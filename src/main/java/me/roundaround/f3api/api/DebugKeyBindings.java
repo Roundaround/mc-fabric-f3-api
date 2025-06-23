@@ -15,6 +15,7 @@ public final class DebugKeyBindings {
   private static DebugKeyBindings instance = null;
 
   // TODO: add support for F3+Esc (pause)
+  // TODO: replace PressAction for the help print out to iterate over helpTranslationKeys
 
   public final DebugKeyBinding toggleRenderingChart;
   public final DebugKeyBinding toggleRenderingAndTickCharts;
