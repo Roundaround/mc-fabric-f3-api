@@ -11,6 +11,7 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
   private final String translationKey;
@@ -63,7 +64,22 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
       return this.boundKey.getLocalizedText();
     }
     MutableText text = Text.empty();
-    this.boundModifiers.stream().sorted().forEachOrdered((modifier) -> text.append(modifier.getText()).append("+"));
+    this.boundModifiers.stream().sorted().forEachOrdered(
+        (modifier) -> text.append(modifier.getText()).append(Text.literal(" + ").formatted(Formatting.GRAY)));
+    text.append(this.boundKey.getLocalizedText());
+    return text;
+  }
+
+  public Text getBoundTextWithF3() {
+    if (this.isUnbound()) {
+      return this.boundKey.getLocalizedText();
+    }
+    MutableText text = InputUtil.Type.KEYSYM.createFromCode(InputUtil.GLFW_KEY_F3)
+        .getLocalizedText()
+        .copy()
+        .append("+");
+    this.boundModifiers.stream().sorted().forEachOrdered(
+        (modifier) -> text.append(modifier.getText()).append("+"));
     text.append(this.boundKey.getLocalizedText());
     return text;
   }
@@ -74,6 +90,10 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
 
   public Set<Modifier> getBoundModifiers() {
     return this.boundModifiers;
+  }
+
+  public void reset() {
+    this.set(this.defaultKey, this.defaultModifiers);
   }
 
   public void set(InputUtil.Key boundKey, Modifier... modifiers) {
