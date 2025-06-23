@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "${modId}",
+  "version": "${version}",
+  "name": "F3 API",
+  "description": "API mod & UI for enabling easy compatibility among vanilla and mods adding F3 debug keybindings.",
+  "authors": [
+    "Roundaround"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/f3-api",
+    "sources": "https://github.com/Roundaround/mc-fabric-f3-api",
+    "issues": "https://github.com/Roundaround/mc-fabric-f3-api/issues"
+  },
+  "license": "MIT",
+  "custom": {
+    "loom:injected_interfaces": {
+      "net/minecraft/class_309": [
+        "me/roundaround/f3api/client/KeyboardExtensions"
+      ]
+    }
+  }
+}
