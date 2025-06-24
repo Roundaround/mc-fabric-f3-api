@@ -1,0 +1,22 @@
+{
+  "f3api.debug.keybinds.title": "Debug Key Binds",
+  "f3api.debug.key.toggle_rendering_chart": "Toggle rendering chart",
+  "f3api.debug.key.toggle_rendering_and_tick_charts": "Toggle rendering and tick charts",
+  "f3api.debug.key.toggle_packet_size_and_ping_charts": "Toggle packet size and ping charts",
+  "f3api.debug.key.reload_chunks": "Reload chunks",
+  "f3api.debug.key.show_hitboxes": "Show hitboxes",
+  "f3api.debug.key.copy_location": "Copy location as /tp command, hold to crash the game",
+  "f3api.debug.key.clear_chat": "Clear chat",
+  "f3api.debug.key.chunk_boundaries": "Show chunk boundaries",
+  "f3api.debug.key.advanced_tooltips": "Advanced tooltips",
+  "f3api.debug.key.inspect": "Copy entity or block data to clipboard",
+  "f3api.debug.key.profiling": "Start/stop profiling",
+  "f3api.debug.key.creative_spectator": "Cycle previous game mode <-> spectator",
+  "f3api.debug.key.pause_focus": "Pause on lost focus",
+  "f3api.debug.key.help": "Show debug list",
+  "f3api.debug.key.dump_dynamic_textures": "Dump dynamic textures",
+  "f3api.debug.key.reload_resourcepacks": "Reload resource packs",
+  "f3api.debug.key.version": "Client version info",
+  "f3api.debug.key.gamemodes": "Open game mode switcher",
+  "f3api.debug.key.toggle_hitboxes_binding": "Toggle hitboxes key binding"
+}

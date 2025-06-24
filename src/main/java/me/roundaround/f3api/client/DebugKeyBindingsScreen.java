@@ -17,33 +17,20 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 
 public class DebugKeyBindingsScreen extends BaseScreen {
-  private static final Set<Integer> RESERVED_KEYS = Set.of(
-      InputUtil.UNKNOWN_KEY.getCode(),
-      InputUtil.GLFW_KEY_BACKSPACE,
-      InputUtil.GLFW_KEY_DELETE,
-      InputUtil.GLFW_KEY_LEFT_SHIFT,
-      InputUtil.GLFW_KEY_RIGHT_SHIFT,
-      InputUtil.GLFW_KEY_LEFT_CONTROL,
-      InputUtil.GLFW_KEY_RIGHT_CONTROL,
-      InputUtil.GLFW_KEY_LEFT_ALT,
-      InputUtil.GLFW_KEY_RIGHT_ALT,
-      InputUtil.GLFW_KEY_LEFT_SUPER,
-      InputUtil.GLFW_KEY_RIGHT_SUPER,
-      InputUtil.GLFW_KEY_F3);
-
   private final ThreeSectionLayoutWidget layout = new ThreeSectionLayoutWidget(this);
 
   private BindingListWidget list;
   private DebugKeyBinding selectedKeyBinding;
 
   public DebugKeyBindingsScreen(Screen parent) {
-    // TODO: i18n
-    super(Text.of("Debug Key Bindings"), new ScreenParent(parent), MinecraftClient.getInstance());
+    super(
+        Text.translatable("f3api.debug.keybinds.title"),
+        new ScreenParent(parent),
+        MinecraftClient.getInstance());
   }
 
   @Override
   protected void init() {
-    // TODO: All sorts of stuff...
     this.layout.addHeader(this.textRenderer, this.title);
 
     this.list = this.layout.addBody(new BindingListWidget(this.client, this.layout));
@@ -77,7 +64,7 @@ public class DebugKeyBindingsScreen extends BaseScreen {
   @Override
   public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
     if (this.selectedKeyBinding != null) {
-      if (RESERVED_KEYS.contains(keyCode)) {
+      if (DebugKeyBinding.RESERVED_KEYS.contains(keyCode)) {
         return false;
       }
 
@@ -94,7 +81,6 @@ public class DebugKeyBindingsScreen extends BaseScreen {
             .filter(Modifier::isActive)
             .toList());
       }
-      // TODO: Persist change
       this.selectedKeyBinding = null;
 
       // TODO: Conflict detection
@@ -114,5 +100,11 @@ public class DebugKeyBindingsScreen extends BaseScreen {
     } else {
       return super.keyPressed(keyCode, scanCode, modifiers);
     }
+  }
+
+  @Override
+  public void removed() {
+    DebugKeyBindings.getInstance().save();
+    super.removed();
   }
 }

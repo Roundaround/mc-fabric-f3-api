@@ -2,6 +2,7 @@ package me.roundaround.f3api.client;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import me.roundaround.f3api.api.DebugKeyBinding;
 import me.roundaround.f3api.api.Modifier;
@@ -31,7 +32,7 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
   }
 
   public static class Entry extends ParentElementEntryListWidget.Entry {
-    private static final int HEIGHT = 20;
+    private static final int HEIGHT = 28;
     private static final int CONTROL_WIDTH = 80;
 
     private final TextRenderer textRenderer;
@@ -60,12 +61,15 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
           .defaultOffAxisContentAlignCenter();
 
       layout.add(
-          LabelWidget.builder(this.textRenderer, keyBinding.getText())
+          LabelWidget.builder(this.textRenderer, List.of(
+              keyBinding.getText(),
+              Text.literal(keyBinding.getId()).formatted(Formatting.GRAY, Formatting.ITALIC)))
               .alignTextLeft()
               .overflowBehavior(LabelWidget.OverflowBehavior.SCROLL)
               .hideBackground()
               .showShadow()
               .height(this.getContentHeight())
+              .lineSpacing(GuiUtil.PADDING)
               .build(),
           (parent, self) -> {
             self.setWidth(parent.getUnusedSpace(self));
@@ -78,11 +82,10 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
               .width(CONTROL_WIDTH)
               .build());
 
-      // TODO: i18n
       this.resetButton = layout.add(
           IconButtonWidget.builder(BuiltinIcon.UNDO_18, Constants.MOD_ID)
               .vanillaSize()
-              .messageAndTooltip(Text.of("Reset"))
+              .messageAndTooltip(Text.translatable("f3api.roundalib.reset.tooltip"))
               .onPress((button) -> {
                 this.keyBinding.reset();
                 onReset.run();

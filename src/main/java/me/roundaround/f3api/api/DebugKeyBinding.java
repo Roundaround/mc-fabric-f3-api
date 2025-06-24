@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 
+import me.roundaround.f3api.client.F3ApiMod;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.MutableText;
@@ -14,6 +15,21 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
+  public static final Set<Integer> RESERVED_KEYS = Set.of(
+      InputUtil.UNKNOWN_KEY.getCode(),
+      InputUtil.GLFW_KEY_BACKSPACE,
+      InputUtil.GLFW_KEY_DELETE,
+      InputUtil.GLFW_KEY_LEFT_SHIFT,
+      InputUtil.GLFW_KEY_RIGHT_SHIFT,
+      InputUtil.GLFW_KEY_LEFT_CONTROL,
+      InputUtil.GLFW_KEY_RIGHT_CONTROL,
+      InputUtil.GLFW_KEY_LEFT_ALT,
+      InputUtil.GLFW_KEY_RIGHT_ALT,
+      InputUtil.GLFW_KEY_LEFT_SUPER,
+      InputUtil.GLFW_KEY_RIGHT_SUPER,
+      InputUtil.GLFW_KEY_F3);
+
+  private final String id;
   private final String translationKey;
   private final InputUtil.Key defaultKey;
   private final Set<Modifier> defaultModifiers;
@@ -21,11 +37,19 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
   private InputUtil.Key boundKey;
   private Set<Modifier> boundModifiers;
 
-  public DebugKeyBinding(String translationKey, int code, Modifier... modifiers) {
-    this(translationKey, code, Arrays.asList(modifiers));
+  public DebugKeyBinding(String id, String translationKey, int code, Modifier... modifiers) {
+    this(id, translationKey, code, Arrays.asList(modifiers));
   }
 
-  public DebugKeyBinding(String translationKey, int code, Collection<Modifier> modifiers) {
+  public DebugKeyBinding(String id, String translationKey, int code, Collection<Modifier> modifiers) {
+    if (RESERVED_KEYS.contains(code)) {
+      throw new IllegalArgumentException(String.format(
+          "Attempted to bind reserved key for %s: %s",
+          id,
+          InputUtil.fromKeyCode(code, 0).getLocalizedText().getString()));
+    }
+
+    this.id = id;
     this.translationKey = translationKey;
     this.defaultKey = InputUtil.Type.KEYSYM.createFromCode(code);
     this.defaultModifiers = Set.copyOf(modifiers);
@@ -43,12 +67,16 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
     if (!(o instanceof DebugKeyBinding other)) {
       return false;
     }
-    return Objects.equals(translationKey, other.translationKey);
+    return Objects.equals(id, other.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(translationKey);
+    return Objects.hashCode(id);
+  }
+
+  public String getId() {
+    return this.id;
   }
 
   public String getTranslationKey() {
@@ -96,8 +124,17 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
     this.set(this.defaultKey, this.defaultModifiers);
   }
 
+  public void set(int code, Modifier... modifiers) {
+    this.set(code, Arrays.asList(modifiers));
+  }
+
   public void set(InputUtil.Key boundKey, Modifier... modifiers) {
     this.set(boundKey, Arrays.asList(modifiers));
+  }
+
+  public void set(int code, Collection<Modifier> modifiers) {
+    this.setKey(code);
+    this.setModifiers(modifiers);
   }
 
   public void set(InputUtil.Key boundKey, Collection<Modifier> modifiers) {
@@ -105,7 +142,15 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
     this.setModifiers(modifiers);
   }
 
+  public void setKey(int code) {
+    this.setKey(InputUtil.Type.KEYSYM.createFromCode(code));
+  }
+
   public void setKey(InputUtil.Key boundKey) {
+    if (RESERVED_KEYS.contains(boundKey.getCode())) {
+      F3ApiMod.LOGGER.warn("Attempted to bind reserved key; ignoring: {}", boundKey.getTranslationKey());
+      return;
+    }
     this.boundKey = boundKey;
   }
 
