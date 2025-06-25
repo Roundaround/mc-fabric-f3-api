@@ -31,27 +31,26 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
       InputUtil.GLFW_KEY_F3);
 
   private final String id;
+  private final String modId;
 
   private String translationKey;
   private @Nullable String helpTranslationKey;
   private boolean mutable;
-  private boolean vanilla;
   private InputUtil.Key defaultKey;
   private Set<Modifier> defaultModifiers;
   private InputUtil.Key boundKey;
   private Set<Modifier> boundModifiers;
 
-  public DebugKeyBinding(String id, Option... options) {
-    this(id, Arrays.asList(options));
+  public DebugKeyBinding(String id, String modId, Option... options) {
+    this(id, modId, Arrays.asList(options));
   }
 
-  public DebugKeyBinding(String id, Collection<Option> options) {
+  public DebugKeyBinding(String id, String modId, Collection<Option> options) {
     this.id = id;
-
+    this.modId = modId;
     this.translationKey = getDefaultI18nKey(id);
     this.helpTranslationKey = null;
     this.mutable = true;
-    this.vanilla = false;
     this.defaultKey = InputUtil.UNKNOWN_KEY;
     this.defaultModifiers = Set.of();
 
@@ -83,6 +82,10 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
 
   public String getId() {
     return this.id;
+  }
+
+  public String getModId() {
+    return this.modId;
   }
 
   public String getTranslationKey() {
@@ -143,10 +146,6 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
 
   public boolean isMutable() {
     return this.mutable;
-  }
-
-  public boolean isVanilla() {
-    return this.vanilla;
   }
 
   public void reset() {
@@ -299,13 +298,6 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
   public static Option withImmutable() {
     return (binding) -> {
       binding.mutable = false;
-    };
-  }
-
-  // Package-private to allow setting for vanilla bindings without exposing
-  static Option withVanilla() {
-    return (binding) -> {
-      binding.vanilla = true;
     };
   }
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import me.roundaround.f3api.api.BindingRegistry;
 import me.roundaround.f3api.api.DebugKeyBinding;
 import me.roundaround.f3api.api.Modifier;
 import me.roundaround.f3api.generated.Constants;
@@ -14,7 +15,10 @@ import me.roundaround.f3api.roundalib.client.gui.util.GuiUtil;
 import me.roundaround.f3api.roundalib.client.gui.widget.FlowListWidget;
 import me.roundaround.f3api.roundalib.client.gui.widget.IconButtonWidget;
 import me.roundaround.f3api.roundalib.client.gui.widget.ParentElementEntryListWidget;
+import me.roundaround.f3api.roundalib.client.gui.widget.TooltipWidget;
 import me.roundaround.f3api.roundalib.client.gui.widget.drawable.LabelWidget;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -23,21 +27,25 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 
 public class BindingListWidget extends ParentElementEntryListWidget<BindingListWidget.Entry> {
   public BindingListWidget(
       MinecraftClient client,
       ThreeSectionLayoutWidget layout) {
     super(client, layout);
+    this.setAlternatingRowShading(true);
   }
 
   public static class Entry extends ParentElementEntryListWidget.Entry {
-    private static final int HEIGHT = 28;
-    private static final int CONTROL_WIDTH = 80;
+    private static final int HEIGHT = 20;
+    private static final int EDIT_BUTTON_WIDTH = ButtonWidget.DEFAULT_WIDTH_SMALL;
 
     private final TextRenderer textRenderer;
     private final DebugKeyBinding keyBinding;
     private final ArrayList<DebugKeyBinding> conflicts = new ArrayList<>();
+    private final LabelWidget label;
+    private final TooltipWidget tooltip;
     private final ButtonWidget editButton;
     private final IconButtonWidget resetButton;
 
@@ -60,16 +68,14 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
           .spacing(GuiUtil.PADDING)
           .defaultOffAxisContentAlignCenter();
 
-      layout.add(
-          LabelWidget.builder(this.textRenderer, List.of(
-              keyBinding.getText(),
-              Text.literal(keyBinding.getId()).formatted(Formatting.GRAY, Formatting.ITALIC)))
+      this.label = layout.add(
+          LabelWidget.builder(this.textRenderer, keyBinding.getText())
               .alignTextLeft()
+              .alignTextCenterY()
               .overflowBehavior(LabelWidget.OverflowBehavior.SCROLL)
               .hideBackground()
               .showShadow()
               .height(this.getContentHeight())
-              .lineSpacing(GuiUtil.PADDING)
               .build(),
           (parent, self) -> {
             self.setWidth(parent.getUnusedSpace(self));
@@ -79,7 +85,7 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
           ButtonWidget.builder(keyBinding.getBoundTextWithF3(), (button) -> {
             onSelect.run();
           })
-              .width(CONTROL_WIDTH)
+              .width(EDIT_BUTTON_WIDTH)
               .build());
 
       this.resetButton = layout.add(
@@ -94,6 +100,10 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
 
       this.update();
 
+      this.tooltip = this.addDrawable(new TooltipWidget(List.of(
+          this.getModNameText(keyBinding.getModId()),
+          Text.literal(BindingRegistry.PROP_PREFIX + keyBinding.getId()).formatted(Formatting.GRAY))));
+
       this.addLayout(layout, (self) -> {
         self.setPositionAndDimensions(
             this.getContentLeft(),
@@ -102,6 +112,16 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
             this.getContentHeight());
       });
       layout.forEachChild(this::addDrawableChild);
+    }
+
+    @Override
+    public void refreshPositions() {
+      super.refreshPositions();
+      this.tooltip.setDimensionsAndPosition(
+          this.label.getWidth(),
+          this.label.getHeight(),
+          this.label.getX(),
+          this.label.getY());
     }
 
     public boolean isDefault() {
@@ -175,6 +195,25 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
         this.editButton.setTooltip(Tooltip.of(Text.translatable("f3api.immutable.tooltip")));
       }
       this.resetButton.active = !this.keyBinding.isDefault();
+    }
+
+    private Text getModNameText(String modId) {
+      if (modId.equals(Identifier.DEFAULT_NAMESPACE)) {
+        return Text.literal("Minecraft").formatted(
+            Formatting.BLUE,
+            Formatting.ITALIC);
+      }
+
+      ModContainer mod = FabricLoader.getInstance().getModContainer(modId).orElse(null);
+      if (mod == null) {
+        return Text.literal(modId).formatted(
+            Formatting.GRAY,
+            Formatting.ITALIC);
+      }
+
+      return Text.literal(mod.getMetadata().getName()).formatted(
+          Formatting.LIGHT_PURPLE,
+          Formatting.ITALIC);
     }
 
     public static FlowListWidget.EntryFactory<Entry> factory(

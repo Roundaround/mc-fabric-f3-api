@@ -3,6 +3,7 @@ package me.roundaround.f3api.api;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -23,9 +24,10 @@ import me.roundaround.f3api.roundalib.util.PathAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public final class BindingRegistry {
-  private static final String PROP_PREFIX = "key.";
+  public static final String PROP_PREFIX = "key.";
 
   private static BindingRegistry instance = null;
 
@@ -139,6 +141,7 @@ public final class BindingRegistry {
     this.toggleHitboxesKeyBinding = this.register(
         new DebugKeyBinding(
             "toggle_hitboxes_binding",
+            Constants.MOD_ID,
             DebugKeyBinding.withHelpOutput(),
             DebugKeyBinding.withDefaultBinding(InputUtil.GLFW_KEY_T, Modifier.SHIFT)),
         (client, messager) -> {
@@ -187,20 +190,10 @@ public final class BindingRegistry {
   }
 
   public void save() {
-    Path file = this.getFilePath();
-
-    try {
-      Files.createDirectories(file.getParent());
-    } catch (Exception e) {
-      F3ApiMod.LOGGER.error("Failed to write debug key bindings file", e);
-      return;
-    }
-
     Properties properties = new Properties();
 
     this.allKeyBindings.forEach((binding) -> {
-      if (binding.isVanilla() && binding.isDefault()) {
-        // TODO: Do I also want to skip non-vanilla when default?
+      if (binding.isDefault()) {
         return;
       }
 
@@ -212,6 +205,26 @@ public final class BindingRegistry {
       value.append(String.valueOf(binding.getBoundKey().getCode()));
       properties.setProperty(PROP_PREFIX + id, value.toString());
     });
+    
+    Path file = this.getFilePath();
+
+    if (properties.isEmpty()) {
+      try {
+        Files.delete(file);
+      } catch (NoSuchFileException e) {
+        // No-op
+      } catch (Exception e) {
+        F3ApiMod.LOGGER.error("Failed to delete debug key bindings file", e);
+      }
+      return;
+    }
+
+    try {
+      Files.createDirectories(file.getParent());
+    } catch (Exception e) {
+      F3ApiMod.LOGGER.error("Failed to write debug key bindings file", e);
+      return;
+    }
 
     try (OutputStream outputStream = Files.newOutputStream(file, StandardOpenOption.CREATE)) {
       properties.store(outputStream, null);
@@ -315,9 +328,8 @@ public final class BindingRegistry {
       DebugKeyBinding.Option... options) {
     ArrayList<DebugKeyBinding.Option> optionsList = new ArrayList<>(Arrays.asList(options));
     optionsList.add(DebugKeyBinding.withForcedDefaultBinding(code));
-    optionsList.add(DebugKeyBinding.withVanilla());
 
-    return this.register(new DebugKeyBinding(id, optionsList), pressAction);
+    return this.register(new DebugKeyBinding(id, Identifier.DEFAULT_NAMESPACE, optionsList), pressAction);
   }
 
   public static BindingRegistry getInstance() {
