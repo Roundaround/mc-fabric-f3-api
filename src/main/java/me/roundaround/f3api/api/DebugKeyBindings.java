@@ -151,8 +151,6 @@ public final class DebugKeyBindings {
         });
 
     this.load();
-
-    F3ApiMod.LOGGER.info("Loaded {} debug key bindings", this.allKeyBindings.size());
   }
 
   public DebugKeyBinding register(@NotNull DebugKeyBinding binding, @NotNull PressAction pressAction) {
