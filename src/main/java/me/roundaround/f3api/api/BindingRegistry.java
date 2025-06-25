@@ -29,9 +29,6 @@ public final class BindingRegistry {
 
   private static BindingRegistry instance = null;
 
-  // TODO: replace PressAction for the help print out to iterate over
-  // helpTranslationKeys
-
   public final DebugKeyBinding reloadChunks;
   public final DebugKeyBinding showHitboxes;
   public final DebugKeyBinding copyLocation;
