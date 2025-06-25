@@ -32,9 +32,6 @@ public final class DebugKeyBindings {
   // TODO: replace PressAction for the help print out to iterate over
   // helpTranslationKeys
 
-  public final DebugKeyBinding toggleRenderingChart;
-  public final DebugKeyBinding toggleRenderingAndTickCharts;
-  public final DebugKeyBinding togglePacketSizeAndPingCharts;
   public final DebugKeyBinding reloadChunks;
   public final DebugKeyBinding showHitboxes;
   public final DebugKeyBinding copyLocation;
@@ -52,6 +49,9 @@ public final class DebugKeyBindings {
   public final DebugKeyBinding pauseGame;
   public final DebugKeyBinding openGameModeSwitcher;
   public final DebugKeyBinding toggleHitboxesKeyBinding;
+  public final DebugKeyBinding toggleRenderingChart;
+  public final DebugKeyBinding toggleRenderingAndTickCharts;
+  public final DebugKeyBinding togglePacketSizeAndPingCharts;
 
   private final LinkedHashSet<DebugKeyBinding> allKeyBindings = new LinkedHashSet<>();
   private final HashMap<String, DebugKeyBinding> idToKeyBinding = new HashMap<>();
@@ -60,15 +60,6 @@ public final class DebugKeyBindings {
   private DebugKeyBindings() {
     // TODO: i18n for all vanilla bindings
 
-    this.toggleRenderingChart = this.registerVanilla(
-        "toggle_rendering_chart",
-        InputUtil.GLFW_KEY_1);
-    this.toggleRenderingAndTickCharts = this.registerVanilla(
-        "toggle_rendering_and_tick_charts",
-        InputUtil.GLFW_KEY_2);
-    this.togglePacketSizeAndPingCharts = this.registerVanilla(
-        "toggle_packet_size_and_ping_charts",
-        InputUtil.GLFW_KEY_3);
     this.reloadChunks = this.registerVanilla(
         "reload_chunks",
         InputUtil.GLFW_KEY_A,
@@ -138,6 +129,15 @@ public final class DebugKeyBindings {
         "gamemodes",
         InputUtil.GLFW_KEY_F4,
         DebugKeyBinding.withHelpOutput());
+    this.toggleRenderingChart = this.registerVanilla(
+        "toggle_rendering_chart",
+        InputUtil.GLFW_KEY_1);
+    this.toggleRenderingAndTickCharts = this.registerVanilla(
+        "toggle_rendering_and_tick_charts",
+        InputUtil.GLFW_KEY_2);
+    this.togglePacketSizeAndPingCharts = this.registerVanilla(
+        "toggle_packet_size_and_ping_charts",
+        InputUtil.GLFW_KEY_3);
 
     this.toggleHitboxesKeyBinding = this.register(
         new DebugKeyBinding(

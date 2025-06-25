@@ -20,6 +20,7 @@ public class DebugKeyBindingsScreen extends BaseScreen {
   private final ThreeSectionLayoutWidget layout = new ThreeSectionLayoutWidget(this);
 
   private BindingListWidget list;
+  private ButtonWidget resetAllButton;
   private DebugKeyBinding selectedKeyBinding;
 
   public DebugKeyBindingsScreen(Screen parent) {
@@ -42,19 +43,26 @@ public class DebugKeyBindingsScreen extends BaseScreen {
             this.selectedKeyBinding = keyBinding;
             this.list.forEachEntry((entry) -> {
               entry.setSelected(entry.getKeyBinding().equals(this.selectedKeyBinding));
-              entry.update();
             });
+            this.update();
           },
-          () -> {
-            this.list.forEachEntry((entry) -> {
-              entry.update();
-            });
-          }));
+          this::update));
     }
 
-    this.layout.addFooter(ButtonWidget.builder(ScreenTexts.DONE, this::done)
-        .width(ButtonWidget.field_49479)
+    this.resetAllButton = this.layout.addFooter(ButtonWidget.builder(
+        Text.translatable("controls.resetAll"),
+        (button) -> {
+          this.list.forEachEntry((entry) -> {
+            entry.setSelected(false);
+            entry.reset();
+          });
+          this.update();
+        })
         .build());
+    this.layout.addFooter(ButtonWidget.builder(ScreenTexts.DONE, this::done)
+        .build());
+
+    this.update();
 
     this.layout.forEachChild(this::addDrawableChild);
     this.refreshWidgetPositions();
@@ -72,10 +80,6 @@ public class DebugKeyBindingsScreen extends BaseScreen {
         return false;
       }
 
-      var isDirty = new Object() {
-        boolean value = false;
-      };
-
       if (keyCode == InputUtil.GLFW_KEY_ESCAPE) {
         this.selectedKeyBinding.setKey(InputUtil.UNKNOWN_KEY);
         this.selectedKeyBinding.setModifiers(Set.of());
@@ -87,18 +91,11 @@ public class DebugKeyBindingsScreen extends BaseScreen {
       }
       this.selectedKeyBinding = null;
 
-      // TODO: Conflict detection
       this.list.forEachEntry((entry) -> {
         entry.setSelected(false);
-        entry.update();
-        if (!entry.isDefault()) {
-          isDirty.value = true;
-        }
       });
 
-      if (isDirty.value) {
-        // TODO: Reset all button
-      }
+      this.update();
 
       return true;
     } else {
@@ -110,5 +107,22 @@ public class DebugKeyBindingsScreen extends BaseScreen {
   public void removed() {
     DebugKeyBindings.getInstance().save();
     super.removed();
+  }
+
+  private void update() {
+    // TODO: Conflict detection
+
+    var isDirty = new Object() {
+      boolean value = false;
+    };
+
+    this.list.forEachEntry((entry) -> {
+      entry.update();
+      if (!entry.isDefault()) {
+        isDirty.value = true;
+      }
+    });
+
+    this.resetAllButton.active = isDirty.value;
   }
 }

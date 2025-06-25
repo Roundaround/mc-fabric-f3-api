@@ -87,7 +87,7 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
               .vanillaSize()
               .messageAndTooltip(Text.translatable("f3api.roundalib.reset.tooltip"))
               .onPress((button) -> {
-                this.keyBinding.reset();
+                this.reset();
                 onReset.run();
               })
               .build());
@@ -110,6 +110,10 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
 
     public DebugKeyBinding getKeyBinding() {
       return this.keyBinding;
+    }
+
+    public void reset() {
+      this.keyBinding.reset();
     }
 
     public void setSelected(boolean selected) {
