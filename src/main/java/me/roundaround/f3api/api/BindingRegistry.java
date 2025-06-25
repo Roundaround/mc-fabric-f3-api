@@ -146,8 +146,6 @@ public final class BindingRegistry {
               .setModifiers(this.showHitboxes.getBoundModifiers().isEmpty() ? Set.of(Modifier.SHIFT) : Set.of());
           return true;
         });
-
-    this.load();
   }
 
   public DebugKeyBinding register(@NotNull DebugKeyBinding binding, @NotNull PressAction pressAction) {
@@ -163,6 +161,12 @@ public final class BindingRegistry {
     this.pressActions.put(binding, pressAction);
 
     return binding;
+  }
+
+  public DebugKeyBinding registerCompatFallThrough(@NotNull DebugKeyBinding binding) {
+    return this.register(binding, (client, messager) -> {
+      return client.keyboard.f3api$processVanillaF3(binding.getDefaultKey(), binding.getDefaultModifiers());
+    });
   }
 
   public List<DebugKeyBinding> getAllKeyBindings() {
@@ -206,7 +210,7 @@ public final class BindingRegistry {
         value.append(modifier.getId()).append("+");
       }
       value.append(String.valueOf(binding.getBoundKey().getCode()));
-      properties.setProperty(id, value.toString());
+      properties.setProperty(PROP_PREFIX + id, value.toString());
     });
 
     try (OutputStream outputStream = Files.newOutputStream(file, StandardOpenOption.CREATE)) {
@@ -216,7 +220,7 @@ public final class BindingRegistry {
     }
   }
 
-  private void load() {
+  public void load() {
     Path file = this.getFilePath();
     if (!Files.exists(file) || !Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
       return;

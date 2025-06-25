@@ -4,8 +4,10 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import me.roundaround.f3api.api.DebugKeyBinding;
 import me.roundaround.f3api.api.BindingRegistry;
+import me.roundaround.f3api.api.DebugKeyBinding;
+import me.roundaround.f3api.api.Modifier;
+import me.roundaround.f3api.client.F3ApiMod;
 import me.roundaround.f3api.client.KeyboardExtensions;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
@@ -17,6 +19,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+
+import java.util.Collection;
 
 @Mixin(Keyboard.class)
 public abstract class KeyboardMixin implements KeyboardExtensions {
@@ -49,8 +53,11 @@ public abstract class KeyboardMixin implements KeyboardExtensions {
   protected abstract void sendMessage(Text message);
 
   @Override
-  public boolean f3api$processVanillaF3(int code) {
-    return this.processF3(code);
+  public boolean f3api$processVanillaF3(int code, Collection<Modifier> modifiers) {
+    F3ApiMod.simulateModifiers(modifiers);
+    boolean result = this.processF3(code);
+    F3ApiMod.clearSimulatedModifiers();
+    return result;
   }
 
   @WrapOperation(method = "onKey", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Keyboard;processF3(I)Z"))

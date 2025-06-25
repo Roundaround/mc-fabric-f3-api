@@ -1,10 +1,10 @@
 package me.roundaround.f3api.api;
 
-import java.util.Locale;
-import java.util.function.Supplier;
-
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
+
+import java.util.Locale;
+import java.util.function.Supplier;
 
 public enum Modifier {
   CONTROL("control", Screen::hasControlDown),
@@ -17,8 +17,7 @@ public enum Modifier {
 
   Modifier(String id, Supplier<Boolean> activeSupplier) {
     this.id = id;
-    // TODO: Replace (vanilla translates to "Left Shift" rather than just "Shift")
-    this.translationKey = "key.keyboard.left." + id;
+    this.translationKey = "f3api.modifier." + id;
     this.activeSupplier = activeSupplier;
   }
 
@@ -36,14 +35,11 @@ public enum Modifier {
 
   public static Modifier fromId(String id) {
     id = id.toLowerCase(Locale.ROOT).trim();
-    switch (id) {
-      case "control":
-        return CONTROL;
-      case "shift":
-        return SHIFT;
-      case "alt":
-        return ALT;
-    }
-    throw new IllegalArgumentException("Unknown modifier: " + id);
+    return switch (id) {
+      case "control" -> CONTROL;
+      case "shift" -> SHIFT;
+      case "alt" -> ALT;
+      default -> throw new IllegalArgumentException("Unknown modifier: " + id);
+    };
   }
 }

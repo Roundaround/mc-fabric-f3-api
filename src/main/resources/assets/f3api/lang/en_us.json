@@ -1,6 +1,9 @@
 {
   "f3api.debug.keybinds.title": "Debug Key Binds",
   "f3api.immutable.tooltip": "This binding is read-only",
+  "f3api.modifier.control": "Control",
+  "f3api.modifier.shift": "Shift",
+  "f3api.modifier.alt": "Alt",
   "f3api.debug.key.toggle_rendering_chart": "Toggle rendering chart",
   "f3api.debug.key.toggle_rendering_chart.help": "%s = %s",
   "f3api.debug.key.toggle_rendering_and_tick_charts": "Toggle rendering and tick charts",
@@ -40,5 +43,15 @@
   "f3api.debug.key.gamemodes": "Open game mode switcher",
   "f3api.debug.key.gamemodes.help": "%s = %s",
   "f3api.debug.key.toggle_hitboxes_binding": "Toggle hitboxes key binding",
-  "f3api.debug.key.toggle_hitboxes_binding.help": "%s = %s"
+  "f3api.debug.key.toggle_hitboxes_binding.help": "%s = %s",
+  "f3api.debug.key.betterf3.cycle_renderdistance": "Cycle render distance",
+  "f3api.debug.key.betterf3.cycle_renderdistance.help": "%s = %s",
+  "f3api.debug.key.betterf3.cycle_renderdistance.invert": "Cycle render distance (invert)",
+  "f3api.debug.key.betterf3.cycle_renderdistance.invert.help": "%s = %s",
+  "f3api.debug.key.betterf3.cycle_simulationdistance": "Cycle simulation distance",
+  "f3api.debug.key.betterf3.cycle_simulationdistance.help": "%s = %s",
+  "f3api.debug.key.betterf3.cycle_simulationdistance.invert": "Cycle simulation distance (invert)",
+  "f3api.debug.key.betterf3.cycle_simulationdistance.invert.help": "%s = %s",
+  "f3api.debug.key.betterf3.modmenu": "BetterF3 Options",
+  "f3api.debug.key.betterf3.modmenu.help": "%s = %s"
 }
