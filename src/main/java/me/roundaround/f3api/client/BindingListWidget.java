@@ -39,7 +39,7 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
 
   public static class Entry extends ParentElementEntryListWidget.Entry {
     private static final int HEIGHT = 20;
-    private static final int EDIT_BUTTON_WIDTH = ButtonWidget.DEFAULT_WIDTH_SMALL;
+    private static final int EDIT_BUTTON_WIDTH = 100;
 
     private final TextRenderer textRenderer;
     private final DebugKeyBinding keyBinding;
