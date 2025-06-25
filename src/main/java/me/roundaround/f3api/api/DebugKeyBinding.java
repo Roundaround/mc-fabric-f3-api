@@ -111,9 +111,9 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
     MutableText text = InputUtil.Type.KEYSYM.createFromCode(InputUtil.GLFW_KEY_F3)
         .getLocalizedText()
         .copy()
-        .append("+");
+        .append(" + ");
     this.boundModifiers.stream().sorted().forEachOrdered(
-        (modifier) -> text.append(modifier.getText()).append("+"));
+        (modifier) -> text.append(modifier.getText()).append(" + "));
     text.append(this.boundKey.getLocalizedText());
     return text;
   }
