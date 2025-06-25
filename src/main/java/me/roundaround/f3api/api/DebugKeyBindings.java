@@ -5,28 +5,30 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import me.roundaround.f3api.client.F3ApiMod;
 import me.roundaround.f3api.generated.Constants;
 import me.roundaround.f3api.roundalib.util.PathAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.Text;
 
 public final class DebugKeyBindings {
   private static final String PROP_PREFIX = "key.";
 
   private static DebugKeyBindings instance = null;
 
-  // TODO: add support for F3+Esc (pause)
   // TODO: replace PressAction for the help print out to iterate over
   // helpTranslationKeys
 
@@ -47,125 +49,124 @@ public final class DebugKeyBindings {
   public final DebugKeyBinding dumpDynamicTextures;
   public final DebugKeyBinding reloadResourcePacks;
   public final DebugKeyBinding showVersionInfo;
+  public final DebugKeyBinding pauseGame;
   public final DebugKeyBinding openGameModeSwitcher;
   public final DebugKeyBinding toggleHitboxesKeyBinding;
 
   private final LinkedHashSet<DebugKeyBinding> allKeyBindings = new LinkedHashSet<>();
   private final HashMap<String, DebugKeyBinding> idToKeyBinding = new HashMap<>();
-  private final HashMap<DebugKeyBinding, String> helpTranslationKeys = new HashMap<>();
   private final HashMap<DebugKeyBinding, PressAction> pressActions = new HashMap<>();
 
   private DebugKeyBindings() {
     // TODO: i18n for all vanilla bindings
 
-    this.toggleRenderingChart = this.vanilla(
-        InputUtil.GLFW_KEY_1,
-        "toggle_rendering_chart");
-    this.toggleRenderingAndTickCharts = this.vanilla(
-        InputUtil.GLFW_KEY_2,
-        "toggle_rendering_and_tick_charts");
-    this.togglePacketSizeAndPingCharts = this.vanilla(
-        InputUtil.GLFW_KEY_3,
-        "toggle_packet_size_and_ping_charts");
-    this.reloadChunks = this.vanilla(
-        InputUtil.GLFW_KEY_A,
+    this.toggleRenderingChart = this.registerVanilla(
+        "toggle_rendering_chart",
+        InputUtil.GLFW_KEY_1);
+    this.toggleRenderingAndTickCharts = this.registerVanilla(
+        "toggle_rendering_and_tick_charts",
+        InputUtil.GLFW_KEY_2);
+    this.togglePacketSizeAndPingCharts = this.registerVanilla(
+        "toggle_packet_size_and_ping_charts",
+        InputUtil.GLFW_KEY_3);
+    this.reloadChunks = this.registerVanilla(
         "reload_chunks",
-        "debug.reload_chunks.help");
-    this.showHitboxes = this.vanilla(
-        InputUtil.GLFW_KEY_B,
+        InputUtil.GLFW_KEY_A,
+        DebugKeyBinding.withHelpOutput());
+    this.showHitboxes = this.registerVanilla(
         "show_hitboxes",
-        "debug.show_hitboxes.help");
-    this.copyLocation = this.vanilla(
-        InputUtil.GLFW_KEY_C,
+        InputUtil.GLFW_KEY_B,
+        DebugKeyBinding.withHelpOutput());
+    this.copyLocation = this.registerVanilla(
         "copy_location",
-        "debug.copy_location.help");
-    this.clearChat = this.vanilla(
-        InputUtil.GLFW_KEY_D,
+        InputUtil.GLFW_KEY_C,
+        DebugKeyBinding.withHelpOutput());
+    this.clearChat = this.registerVanilla(
         "clear_chat",
-        "debug.clear_chat.help");
-    this.showChunkBoundaries = this.vanilla(
-        InputUtil.GLFW_KEY_G,
+        InputUtil.GLFW_KEY_D,
+        DebugKeyBinding.withHelpOutput());
+    this.showChunkBoundaries = this.registerVanilla(
         "chunk_boundaries",
-        "debug.chunk_boundaries.help");
-    this.advancedTooltips = this.vanilla(
-        InputUtil.GLFW_KEY_H,
+        InputUtil.GLFW_KEY_G,
+        DebugKeyBinding.withHelpOutput());
+    this.advancedTooltips = this.registerVanilla(
         "advanced_tooltips",
-        "debug.advanced_tooltips.help");
-    this.inspect = this.vanilla(
-        InputUtil.GLFW_KEY_I,
+        InputUtil.GLFW_KEY_H,
+        DebugKeyBinding.withHelpOutput());
+    this.inspect = this.registerVanilla(
         "inspect",
-        "debug.inspect.help");
-    this.toggleDebugProfiler = this.vanilla(
-        InputUtil.GLFW_KEY_L,
+        InputUtil.GLFW_KEY_I,
+        DebugKeyBinding.withHelpOutput());
+    this.toggleDebugProfiler = this.registerVanilla(
         "profiling",
-        "debug.profiling.help");
-    this.toggleSpectator = this.vanilla(
-        InputUtil.GLFW_KEY_N,
+        InputUtil.GLFW_KEY_L,
+        DebugKeyBinding.withHelpOutput());
+    this.toggleSpectator = this.registerVanilla(
         "creative_spectator",
-        "debug.creative_spectator.help");
-    this.togglePauseOnLostFocus = this.vanilla(
-        InputUtil.GLFW_KEY_P,
+        InputUtil.GLFW_KEY_N,
+        DebugKeyBinding.withHelpOutput());
+    this.togglePauseOnLostFocus = this.registerVanilla(
         "pause_focus",
-        "debug.pause_focus.help");
-    this.showHelp = this.vanilla(
-        InputUtil.GLFW_KEY_Q,
+        InputUtil.GLFW_KEY_P,
+        DebugKeyBinding.withHelpOutput());
+    this.showHelp = this.registerVanilla(
         "help",
-        "debug.help.help");
-    this.dumpDynamicTextures = this.vanilla(
-        InputUtil.GLFW_KEY_S,
+        InputUtil.GLFW_KEY_Q,
+        (client, messager) -> {
+          this.printDebugHelp(messager::debugMessage, messager::sendMessage);
+          return true;
+        },
+        DebugKeyBinding.withHelpOutput());
+    this.dumpDynamicTextures = this.registerVanilla(
         "dump_dynamic_textures",
-        "debug.dump_dynamic_textures.help");
-    this.reloadResourcePacks = this.vanilla(
-        InputUtil.GLFW_KEY_T,
+        InputUtil.GLFW_KEY_S,
+        DebugKeyBinding.withHelpOutput());
+    this.reloadResourcePacks = this.registerVanilla(
         "reload_resourcepacks",
-        "debug.reload_resourcepacks.help");
-    this.showVersionInfo = this.vanilla(
-        InputUtil.GLFW_KEY_V,
+        InputUtil.GLFW_KEY_T,
+        DebugKeyBinding.withHelpOutput());
+    this.showVersionInfo = this.registerVanilla(
         "version",
-        "debug.version.help");
-    this.openGameModeSwitcher = this.vanilla(
-        InputUtil.GLFW_KEY_F4,
+        InputUtil.GLFW_KEY_V,
+        DebugKeyBinding.withHelpOutput());
+    this.pauseGame = this.registerVanilla(
+        "pause",
+        InputUtil.GLFW_KEY_ESCAPE,
+        DebugKeyBinding.withHelpOutput(),
+        DebugKeyBinding.withImmutable());
+    this.openGameModeSwitcher = this.registerVanilla(
         "gamemodes",
-        "debug.gamemodes.help");
+        InputUtil.GLFW_KEY_F4,
+        DebugKeyBinding.withHelpOutput());
 
     this.toggleHitboxesKeyBinding = this.register(
         new DebugKeyBinding(
             "toggle_hitboxes_binding",
-            "f3api.debug.key.toggle_hitboxes_binding",
-            InputUtil.GLFW_KEY_T,
-            Modifier.SHIFT),
-        (client) -> {
-          this.showHitboxes.setModifiers(this.showHitboxes.getBoundModifiers().isEmpty()
-              ? Set.of(Modifier.SHIFT)
-              : Set.of());
+            DebugKeyBinding.withHelpOutput(),
+            DebugKeyBinding.withDefaultBinding(InputUtil.GLFW_KEY_T, Modifier.SHIFT)),
+        (client, messager) -> {
+          this.showHitboxes
+              .setModifiers(this.showHitboxes.getBoundModifiers().isEmpty() ? Set.of(Modifier.SHIFT) : Set.of());
           return true;
         });
 
     this.load();
+
+    F3ApiMod.LOGGER.info("Loaded {} debug key bindings", this.allKeyBindings.size());
   }
 
   public DebugKeyBinding register(@NotNull DebugKeyBinding binding, @NotNull PressAction pressAction) {
-    return this.register(binding, null, pressAction);
-  }
-
-  public DebugKeyBinding register(
-      @NotNull DebugKeyBinding binding,
-      @Nullable String helpTranslationKey,
-      @NotNull PressAction pressAction) {
     String id = binding.getId();
     DebugKeyBinding existing = this.idToKeyBinding.put(id, binding);
     if (existing != null) {
       F3ApiMod.LOGGER.warn("Registered duplicate debug key binding; replacing existing binding: {}", id);
       this.allKeyBindings.remove(existing);
-      this.helpTranslationKeys.remove(existing);
       this.pressActions.remove(existing);
     }
 
     this.allKeyBindings.add(binding);
-    if (helpTranslationKey != null) {
-      this.helpTranslationKeys.put(binding, helpTranslationKey);
-    }
     this.pressActions.put(binding, pressAction);
+
     return binding;
   }
 
@@ -174,7 +175,16 @@ public final class DebugKeyBindings {
   }
 
   public PressAction getPressAction(DebugKeyBinding binding) {
-    return this.pressActions.getOrDefault(binding, (client) -> false);
+    return this.pressActions.getOrDefault(binding, (c, m) -> false);
+  }
+
+  public void printDebugHelp(Consumer<String> debugLog, Consumer<Text> sendMessage) {
+    debugLog.accept("debug.help.message");
+    for (DebugKeyBinding binding : this.allKeyBindings) {
+      if (binding.hasHelpOutput()) {
+        sendMessage.accept(binding.getHelpText());
+      }
+    }
   }
 
   public void save() {
@@ -190,11 +200,17 @@ public final class DebugKeyBindings {
     Properties properties = new Properties();
 
     this.allKeyBindings.forEach((binding) -> {
-      String id = binding.getId();
-      StringBuilder value = new StringBuilder(String.valueOf(binding.getBoundKey().getCode()));
-      for (Modifier modifier : binding.getBoundModifiers()) {
-        value.append("+").append(modifier.getId());
+      if (binding.isVanilla() && binding.isDefault()) {
+        // TODO: Do I also want to skip non-vanilla when default?
+        return;
       }
+
+      String id = binding.getId();
+      StringBuilder value = new StringBuilder();
+      for (Modifier modifier : binding.getBoundModifiers()) {
+        value.append(modifier.getId()).append("+");
+      }
+      value.append(String.valueOf(binding.getBoundKey().getCode()));
       properties.setProperty(id, value.toString());
     });
 
@@ -203,17 +219,6 @@ public final class DebugKeyBindings {
     } catch (Exception e) {
       F3ApiMod.LOGGER.error("Failed to write debug key bindings file", e);
     }
-  }
-
-  private DebugKeyBinding vanilla(int code, String id) {
-    return this.vanilla(code, id, null);
-  }
-
-  private DebugKeyBinding vanilla(int code, String id, @Nullable String helpTranslationKey) {
-    return this.register(
-        new DebugKeyBinding(id, "f3api.debug.key." + id, code),
-        helpTranslationKey,
-        (client) -> client.keyboard.f3api$processVanillaF3(code));
   }
 
   private void load() {
@@ -245,8 +250,13 @@ public final class DebugKeyBindings {
         return;
       }
 
-      if (value.isBlank() || value.equals("-1")) {
+      if (value.equals("-1")) {
         binding.set(InputUtil.UNKNOWN_KEY, Set.of());
+        return;
+      }
+
+      if (value.isBlank()) {
+        binding.reset();
         return;
       }
 
@@ -295,6 +305,22 @@ public final class DebugKeyBindings {
     return PathAccessor.getInstance().getModConfigFile(Constants.MOD_ID, PathAccessor.ConfigFormat.PROPERTIES);
   }
 
+  private DebugKeyBinding registerVanilla(String id, int code, DebugKeyBinding.Option... options) {
+    return this.registerVanilla(id, code, (client, messager) -> client.keyboard.f3api$processVanillaF3(code), options);
+  }
+
+  private DebugKeyBinding registerVanilla(
+      String id,
+      int code,
+      PressAction pressAction,
+      DebugKeyBinding.Option... options) {
+    ArrayList<DebugKeyBinding.Option> optionsList = new ArrayList<>(Arrays.asList(options));
+    optionsList.add(DebugKeyBinding.withForcedDefaultBinding(code));
+    optionsList.add(DebugKeyBinding.withVanilla());
+
+    return this.register(new DebugKeyBinding(id, optionsList), pressAction);
+  }
+
   public static DebugKeyBindings getInstance() {
     if (instance == null) {
       instance = new DebugKeyBindings();
@@ -308,6 +334,18 @@ public final class DebugKeyBindings {
   }
 
   public interface PressAction {
-    boolean run(MinecraftClient client);
+    boolean run(MinecraftClient client, Messager messager);
+  }
+
+  public interface Messager {
+    void debugMessage(Text text);
+
+    void debugMessage(String key);
+
+    void debugError(Text text);
+
+    void debugFormatted(String pattern, Object... args);
+
+    void sendMessage(Text text);
   }
 }

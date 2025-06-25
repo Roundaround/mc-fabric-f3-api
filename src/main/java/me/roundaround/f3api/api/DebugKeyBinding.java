@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import me.roundaround.f3api.client.F3ApiMod;
 import net.minecraft.client.resource.language.I18n;
@@ -30,29 +31,34 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
       InputUtil.GLFW_KEY_F3);
 
   private final String id;
-  private final String translationKey;
-  private final InputUtil.Key defaultKey;
-  private final Set<Modifier> defaultModifiers;
 
+  private String translationKey;
+  private @Nullable String helpTranslationKey;
+  private boolean mutable;
+  private boolean vanilla;
+  private InputUtil.Key defaultKey;
+  private Set<Modifier> defaultModifiers;
   private InputUtil.Key boundKey;
   private Set<Modifier> boundModifiers;
 
-  public DebugKeyBinding(String id, String translationKey, int code, Modifier... modifiers) {
-    this(id, translationKey, code, Arrays.asList(modifiers));
+  public DebugKeyBinding(String id, Option... options) {
+    this(id, Arrays.asList(options));
   }
 
-  public DebugKeyBinding(String id, String translationKey, int code, Collection<Modifier> modifiers) {
-    if (RESERVED_KEYS.contains(code)) {
-      throw new IllegalArgumentException(String.format(
-          "Attempted to bind reserved key for %s: %s",
-          id,
-          InputUtil.fromKeyCode(code, 0).getLocalizedText().getString()));
+  public DebugKeyBinding(String id, Collection<Option> options) {
+    this.id = id;
+
+    this.translationKey = getDefaultI18nKey(id);
+    this.helpTranslationKey = null;
+    this.mutable = true;
+    this.vanilla = false;
+    this.defaultKey = InputUtil.UNKNOWN_KEY;
+    this.defaultModifiers = Set.of();
+
+    for (Option option : options) {
+      option.apply(this);
     }
 
-    this.id = id;
-    this.translationKey = translationKey;
-    this.defaultKey = InputUtil.Type.KEYSYM.createFromCode(code);
-    this.defaultModifiers = Set.copyOf(modifiers);
     this.boundKey = this.defaultKey;
     this.boundModifiers = this.defaultModifiers;
   }
@@ -112,12 +118,35 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
     return text;
   }
 
+  public boolean hasHelpOutput() {
+    return this.helpTranslationKey != null;
+  }
+
+  public String getHelpTranslationKey() {
+    return this.helpTranslationKey;
+  }
+
+  public Text getHelpText() {
+    if (!this.hasHelpOutput()) {
+      return Text.empty();
+    }
+    return Text.translatable(this.helpTranslationKey, this.getBoundTextWithF3(), this.getText());
+  }
+
   public InputUtil.Key getBoundKey() {
     return this.boundKey;
   }
 
   public Set<Modifier> getBoundModifiers() {
     return this.boundModifiers;
+  }
+
+  public boolean isMutable() {
+    return this.mutable;
+  }
+
+  public boolean isVanilla() {
+    return this.vanilla;
   }
 
   public void reset() {
@@ -147,6 +176,9 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
   }
 
   public void setKey(InputUtil.Key boundKey) {
+    if (!this.mutable) {
+      return;
+    }
     if (RESERVED_KEYS.contains(boundKey.getCode())) {
       F3ApiMod.LOGGER.warn("Attempted to bind reserved key; ignoring: {}", boundKey.getTranslationKey());
       return;
@@ -155,6 +187,9 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
   }
 
   public void setModifiers(Collection<Modifier> modifiers) {
+    if (!this.mutable) {
+      return;
+    }
     this.boundModifiers = Set.copyOf(modifiers);
   }
 
@@ -185,5 +220,97 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
 
     return this.boundKey.getCode() == code && Arrays.stream(Modifier.values())
         .allMatch((modifier) -> modifier.isActive() == this.boundModifiers.contains(modifier));
+  }
+
+  private static String getDefaultI18nKey(String id) {
+    return "f3api.debug.key." + id;
+  }
+
+  private static String getDefaultHelpI18nKey(String id) {
+    return getDefaultI18nKey(id) + ".help";
+  }
+
+  public static Option withDefaultBinding(int code, Modifier... modifiers) {
+    return withDefaultBinding(InputUtil.Type.KEYSYM.createFromCode(code), modifiers);
+  }
+
+  public static Option withDefaultBinding(int code, Collection<Modifier> modifiers) {
+    return withDefaultBinding(InputUtil.Type.KEYSYM.createFromCode(code), modifiers);
+  }
+
+  public static Option withDefaultBinding(InputUtil.Key key, Modifier... modifiers) {
+    return withDefaultBinding(key, Arrays.asList(modifiers));
+  }
+
+  public static Option withDefaultBinding(InputUtil.Key key, Collection<Modifier> modifiers) {
+    return (binding) -> {
+      if (RESERVED_KEYS.contains(key.getCode())) {
+        throw new IllegalArgumentException(String.format(
+            "Attempted to bind reserved key for %s: %s",
+            binding.id,
+            key.getLocalizedText().getString()));
+      }
+      binding.defaultKey = key;
+      binding.defaultModifiers = modifiers == null ? Set.of() : Set.copyOf(modifiers);
+    };
+  }
+
+  // Package-private to allow setting i.e. "pause game" binding internally
+  static Option withForcedDefaultBinding(int code, Modifier... modifiers) {
+    return withForcedDefaultBinding(InputUtil.Type.KEYSYM.createFromCode(code), modifiers);
+  }
+
+  // Package-private to allow setting i.e. "pause game" binding internally
+  static Option withForcedDefaultBinding(int code, Collection<Modifier> modifiers) {
+    return withForcedDefaultBinding(InputUtil.Type.KEYSYM.createFromCode(code), modifiers);
+  }
+
+  // Package-private to allow setting i.e. "pause game" binding internally
+  static Option withForcedDefaultBinding(InputUtil.Key key, Modifier... modifiers) {
+    return withForcedDefaultBinding(key, Arrays.asList(modifiers));
+  }
+
+  // Package-private to allow setting i.e. "pause game" binding internally
+  static Option withForcedDefaultBinding(InputUtil.Key key, Collection<Modifier> modifiers) {
+    return (binding) -> {
+      binding.defaultKey = key;
+      binding.defaultModifiers = modifiers == null ? Set.of() : Set.copyOf(modifiers);
+    };
+  }
+
+  public static Option withI18nKey(String i18nKey) {
+    return (binding) -> {
+      binding.translationKey = i18nKey;
+    };
+  }
+
+  public static Option withHelpOutput() {
+    return (binding) -> {
+      binding.helpTranslationKey = getDefaultHelpI18nKey(binding.id);
+    };
+  }
+
+  public static Option withHelpOutput(String i18nKey) {
+    return (binding) -> {
+      binding.helpTranslationKey = i18nKey;
+    };
+  }
+
+  public static Option withImmutable() {
+    return (binding) -> {
+      binding.mutable = false;
+    };
+  }
+
+  // Package-private to allow setting for vanilla bindings without exposing
+  static Option withVanilla() {
+    return (binding) -> {
+      binding.vanilla = true;
+    };
+  }
+
+  @FunctionalInterface
+  public interface Option {
+    void apply(DebugKeyBinding binding);
   }
 }

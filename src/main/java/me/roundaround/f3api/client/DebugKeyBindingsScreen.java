@@ -35,17 +35,21 @@ public class DebugKeyBindingsScreen extends BaseScreen {
 
     this.list = this.layout.addBody(new BindingListWidget(this.client, this.layout));
     for (DebugKeyBinding keyBinding : DebugKeyBindings.getInstance().getAllKeyBindings()) {
-      this.list.addEntry(BindingListWidget.Entry.factory(this.textRenderer, keyBinding, () -> {
-        this.selectedKeyBinding = keyBinding;
-        this.list.forEachEntry((entry) -> {
-          entry.setSelected(entry.getKeyBinding().equals(this.selectedKeyBinding));
-          entry.update();
-        });
-      }, () -> {
-        this.list.forEachEntry((entry) -> {
-          entry.update();
-        });
-      }));
+      this.list.addEntry(BindingListWidget.Entry.factory(
+          this.textRenderer,
+          keyBinding,
+          () -> {
+            this.selectedKeyBinding = keyBinding;
+            this.list.forEachEntry((entry) -> {
+              entry.setSelected(entry.getKeyBinding().equals(this.selectedKeyBinding));
+              entry.update();
+            });
+          },
+          () -> {
+            this.list.forEachEntry((entry) -> {
+              entry.update();
+            });
+          }));
     }
 
     this.layout.addFooter(ButtonWidget.builder(ScreenTexts.DONE, this::done)

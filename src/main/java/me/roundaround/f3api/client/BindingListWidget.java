@@ -166,6 +166,7 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
             conflictsText)));
       }
 
+      this.editButton.active = this.keyBinding.isMutable();
       this.resetButton.active = !this.keyBinding.isDefault();
     }
 
