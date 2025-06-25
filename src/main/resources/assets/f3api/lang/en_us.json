@@ -1,5 +1,6 @@
 {
   "f3api.debug.keybinds.title": "Debug Key Binds",
+  "f3api.immutable.tooltip": "This binding is read-only",
   "f3api.debug.key.toggle_rendering_chart": "Toggle rendering chart",
   "f3api.debug.key.toggle_rendering_chart.help": "%s = %s",
   "f3api.debug.key.toggle_rendering_and_tick_charts": "Toggle rendering and tick charts",

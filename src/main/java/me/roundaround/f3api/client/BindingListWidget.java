@@ -167,6 +167,9 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
       }
 
       this.editButton.active = this.keyBinding.isMutable();
+      if (!this.keyBinding.isMutable()) {
+        this.editButton.setTooltip(Tooltip.of(Text.translatable("f3api.immutable.tooltip")));
+      }
       this.resetButton.active = !this.keyBinding.isDefault();
     }
 
