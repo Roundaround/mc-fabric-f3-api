@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 import me.roundaround.f3api.api.DebugKeyBinding;
-import me.roundaround.f3api.api.DebugKeyBindings;
+import me.roundaround.f3api.api.BindingRegistry;
 import me.roundaround.f3api.api.Modifier;
 import me.roundaround.f3api.roundalib.client.gui.layout.screen.ThreeSectionLayoutWidget;
 import me.roundaround.f3api.roundalib.client.gui.screen.BaseScreen;
@@ -35,7 +35,7 @@ public class DebugKeyBindingsScreen extends BaseScreen {
     this.layout.addHeader(this.textRenderer, this.title);
 
     this.list = this.layout.addBody(new BindingListWidget(this.client, this.layout));
-    for (DebugKeyBinding keyBinding : DebugKeyBindings.getInstance().getAllKeyBindings()) {
+    for (DebugKeyBinding keyBinding : BindingRegistry.getInstance().getAllKeyBindings()) {
       this.list.addEntry(BindingListWidget.Entry.factory(
           this.textRenderer,
           keyBinding,
@@ -105,7 +105,7 @@ public class DebugKeyBindingsScreen extends BaseScreen {
 
   @Override
   public void removed() {
-    DebugKeyBindings.getInstance().save();
+    BindingRegistry.getInstance().save();
     super.removed();
   }
 

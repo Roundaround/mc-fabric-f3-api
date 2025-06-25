@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import me.roundaround.f3api.api.DebugKeyBinding;
-import me.roundaround.f3api.api.DebugKeyBindings;
+import me.roundaround.f3api.api.BindingRegistry;
 import me.roundaround.f3api.client.KeyboardExtensions;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(Keyboard.class)
 public abstract class KeyboardMixin implements KeyboardExtensions {
   @Unique
-  private DebugKeyBindings.Messager messager;
+  private BindingRegistry.Messager messager;
 
   @Shadow
   @Final
@@ -75,12 +75,12 @@ public abstract class KeyboardMixin implements KeyboardExtensions {
       return original;
     }
 
-    return DebugKeyBindings.getInstance().copyLocation.matches(keyCode);
+    return BindingRegistry.getInstance().copyLocation.matches(keyCode);
   }
 
   @Unique
   private boolean altProcessF3(int code) {
-    DebugKeyBindings bindings = DebugKeyBindings.getInstance();
+    BindingRegistry bindings = BindingRegistry.getInstance();
     for (DebugKeyBinding binding : bindings.getAllKeyBindings()) {
       if (binding.matches(code)) {
         if (bindings.getPressAction(binding).run(this.client, this.getMessager())) {
@@ -92,12 +92,12 @@ public abstract class KeyboardMixin implements KeyboardExtensions {
   }
 
   @Unique
-  private DebugKeyBindings.Messager getMessager() {
+  private BindingRegistry.Messager getMessager() {
     if (this.messager != null) {
       return this.messager;
     }
 
-    this.messager = new DebugKeyBindings.Messager() {
+    this.messager = new BindingRegistry.Messager() {
       @Override
       public void debugMessage(Text text) {
         KeyboardMixin.this.debugLog(text);

@@ -24,10 +24,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 
-public final class DebugKeyBindings {
+public final class BindingRegistry {
   private static final String PROP_PREFIX = "key.";
 
-  private static DebugKeyBindings instance = null;
+  private static BindingRegistry instance = null;
 
   // TODO: replace PressAction for the help print out to iterate over
   // helpTranslationKeys
@@ -57,7 +57,7 @@ public final class DebugKeyBindings {
   private final HashMap<String, DebugKeyBinding> idToKeyBinding = new HashMap<>();
   private final HashMap<DebugKeyBinding, PressAction> pressActions = new HashMap<>();
 
-  private DebugKeyBindings() {
+  private BindingRegistry() {
     // TODO: i18n for all vanilla bindings
 
     this.reloadChunks = this.registerVanilla(
@@ -319,9 +319,9 @@ public final class DebugKeyBindings {
     return this.register(new DebugKeyBinding(id, optionsList), pressAction);
   }
 
-  public static DebugKeyBindings getInstance() {
+  public static BindingRegistry getInstance() {
     if (instance == null) {
-      instance = new DebugKeyBindings();
+      instance = new BindingRegistry();
     }
     return instance;
   }
