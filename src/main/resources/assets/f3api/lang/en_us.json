@@ -1,5 +1,6 @@
 {
   "f3api.debug.keybinds.title": "Debug Key Binds",
+  "f3api.default": "Default: %s",
   "f3api.immutable.tooltip": "This binding is read-only",
   "f3api.modifier.control": "Control",
   "f3api.modifier.shift": "Shift",

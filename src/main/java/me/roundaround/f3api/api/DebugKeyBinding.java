@@ -13,7 +13,6 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
   public static final Set<Integer> RESERVED_KEYS = Set.of(
@@ -100,25 +99,11 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
     if (this.isUnbound()) {
       return this.boundKey.getLocalizedText();
     }
-    MutableText text = Text.empty();
-    this.boundModifiers.stream().sorted().forEachOrdered(
-        (modifier) -> text.append(modifier.getText()).append(Text.literal(" + ").formatted(Formatting.GRAY)));
-    text.append(this.boundKey.getLocalizedText());
-    return text;
+    return this.getKeyText(this.boundKey, this.boundModifiers);
   }
 
-  public Text getBoundTextWithF3() {
-    if (this.isUnbound()) {
-      return this.boundKey.getLocalizedText();
-    }
-    MutableText text = InputUtil.Type.KEYSYM.createFromCode(InputUtil.GLFW_KEY_F3)
-        .getLocalizedText()
-        .copy()
-        .append(" + ");
-    this.boundModifiers.stream().sorted().forEachOrdered(
-        (modifier) -> text.append(modifier.getText()).append(" + "));
-    text.append(this.boundKey.getLocalizedText());
-    return text;
+  public Text getDefaultText() {
+    return this.getKeyText(this.defaultKey, this.defaultModifiers);
   }
 
   public boolean hasHelpOutput() {
@@ -133,7 +118,7 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
     if (!this.hasHelpOutput()) {
       return Text.empty();
     }
-    return Text.translatable(this.helpTranslationKey, this.getBoundTextWithF3(), this.getText());
+    return Text.translatable(this.helpTranslationKey, this.getBoundText(), this.getText());
   }
 
   public InputUtil.Key getBoundKey() {
@@ -219,6 +204,17 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
 
     return this.boundKey.getCode() == code && Arrays.stream(Modifier.values())
         .allMatch((modifier) -> modifier.isActive() == this.boundModifiers.contains(modifier));
+  }
+
+  private Text getKeyText(InputUtil.Key key, Collection<Modifier> modifiers) {
+    MutableText text = InputUtil.Type.KEYSYM.createFromCode(InputUtil.GLFW_KEY_F3)
+        .getLocalizedText()
+        .copy()
+        .append(" + ");
+    modifiers.stream().sorted().forEachOrdered(
+        (modifier) -> text.append(modifier.getText()).append(" + "));
+    text.append(key.getLocalizedText());
+    return text;
   }
 
   private static String getDefaultI18nKey(String id) {

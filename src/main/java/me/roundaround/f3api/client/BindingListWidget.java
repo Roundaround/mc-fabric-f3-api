@@ -82,7 +82,7 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
           });
 
       this.editButton = layout.add(
-          ButtonWidget.builder(keyBinding.getBoundTextWithF3(), (button) -> {
+          ButtonWidget.builder(keyBinding.getBoundText(), (button) -> {
             onSelect.run();
           })
               .width(EDIT_BUTTON_WIDTH)
@@ -102,7 +102,8 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
 
       this.tooltip = this.addDrawable(new TooltipWidget(List.of(
           this.getModNameText(keyBinding.getModId()),
-          Text.literal(BindingRegistry.PROP_PREFIX + keyBinding.getId()).formatted(Formatting.GRAY))));
+          Text.literal(BindingRegistry.PROP_PREFIX + keyBinding.getId()).formatted(Formatting.GRAY),
+          Text.translatable("f3api.default", keyBinding.getDefaultText()))));
 
       this.addLayout(layout, (self) -> {
         self.setPositionAndDimensions(
@@ -155,7 +156,7 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
     }
 
     public void update() {
-      MutableText boundText = this.keyBinding.getBoundTextWithF3().copy();
+      MutableText boundText = this.keyBinding.getBoundText().copy();
 
       MutableText conflictsText = null;
       if (!this.conflicts.isEmpty()) {
