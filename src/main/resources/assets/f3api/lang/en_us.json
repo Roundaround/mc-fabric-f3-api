@@ -54,5 +54,7 @@
   "f3api.debug.key.betterf3.cycle_simulationdistance.invert": "Cycle simulation distance (invert)",
   "f3api.debug.key.betterf3.cycle_simulationdistance.invert.help": "%s = %s",
   "f3api.debug.key.betterf3.modmenu": "BetterF3 Options",
-  "f3api.debug.key.betterf3.modmenu.help": "%s = %s"
+  "f3api.debug.key.betterf3.modmenu.help": "%s = %s",
+  "f3api.debug.key.experienceprogress.toggle": "Show experience progress",
+  "f3api.debug.key.experienceprogress.toggle.help": "%s = %s"
 }
