@@ -329,7 +329,7 @@ public final class BindingRegistry {
     ArrayList<DebugKeyBinding.Option> optionsList = new ArrayList<>(Arrays.asList(options));
     optionsList.add(DebugKeyBinding.withForcedDefaultBinding(code));
 
-    return this.register(new DebugKeyBinding(id, Identifier.DEFAULT_NAMESPACE, optionsList), pressAction);
+    return this.register(new DebugKeyBinding(Identifier.DEFAULT_NAMESPACE, id, optionsList), pressAction);
   }
 
   public static BindingRegistry getInstance() {

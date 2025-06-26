@@ -25,7 +25,7 @@ public class DebugKeyBindingsScreen extends BaseScreen {
 
   public DebugKeyBindingsScreen(Screen parent) {
     super(
-        Text.translatable("f3api.debug.keybinds.title"),
+        Text.translatable("f3api.keybinds.title"),
         new ScreenParent(parent),
         MinecraftClient.getInstance());
   }

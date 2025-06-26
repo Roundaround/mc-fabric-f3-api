@@ -29,8 +29,8 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
       InputUtil.GLFW_KEY_RIGHT_SUPER,
       InputUtil.GLFW_KEY_F3);
 
-  private final String id;
   private final String modId;
+  private final String id;
 
   private String translationKey;
   private @Nullable String helpTranslationKey;
@@ -40,13 +40,18 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
   private InputUtil.Key boundKey;
   private Set<Modifier> boundModifiers;
 
-  public DebugKeyBinding(String id, String modId, Option... options) {
-    this(id, modId, Arrays.asList(options));
+  public DebugKeyBinding(String modId, String id, Option... options) {
+    this(modId, id, Arrays.asList(options));
   }
 
-  public DebugKeyBinding(String id, String modId, Collection<Option> options) {
-    this.id = id;
+  public DebugKeyBinding(String modId, String id, Collection<Option> options) {
     this.modId = modId;
+
+    if (!id.startsWith(modId + ".")) {
+      id = modId + "." + id;
+    }
+    this.id = id;
+
     this.translationKey = getDefaultI18nKey(id);
     this.helpTranslationKey = null;
     this.mutable = true;
@@ -218,7 +223,7 @@ public class DebugKeyBinding implements Comparable<DebugKeyBinding> {
   }
 
   private static String getDefaultI18nKey(String id) {
-    return "f3api.debug.key." + id;
+    return "f3api.key." + id;
   }
 
   private static String getDefaultHelpI18nKey(String id) {

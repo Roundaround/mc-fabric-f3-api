@@ -15,9 +15,8 @@ import net.minecraft.text.Text;
 public abstract class ControlsOptionsScreenMixin extends GameOptionsScreen {
   @Inject(method = "addOptions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/OptionListWidget;addWidgetEntry(Lnet/minecraft/client/gui/widget/ClickableWidget;Lnet/minecraft/client/gui/widget/ClickableWidget;)V", shift = At.Shift.AFTER))
   private void addDebugKeyBindingsButton(CallbackInfo ci) {
-    // TODO: i18n
     this.body.addWidgetEntry(ButtonWidget.builder(
-        Text.of("Debug Key Binds..."),
+        Text.translatable("f3api.controls.debug_keybinds"),
         (button) -> {
           this.client.setScreen(new DebugKeyBindingsScreen(this));
         }).build(),
