@@ -3,7 +3,7 @@
   "id": "${modId}",
   "version": "${version}",
   "name": "F3 API",
-  "description": "API mod & UI for enabling easy compatibility among vanilla and mods adding F3 debug keybindings.",
+  "description": "API & UI enabling easy compatibility among vanilla and mods with F3 key binds.",
   "authors": [
     "Roundaround"
   ],
