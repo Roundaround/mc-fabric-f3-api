@@ -3,6 +3,7 @@ package me.roundaround.f3api.client;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 
 import me.roundaround.f3api.api.BindingRegistry;
 import me.roundaround.f3api.api.DebugKeyBinding;
@@ -50,11 +51,12 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
     private final IconButtonWidget resetButton;
 
     private boolean selected = false;
+    private String boundString = "";
 
     public Entry(
         TextRenderer textRenderer,
         DebugKeyBinding keyBinding,
-        Runnable onSelect,
+        Consumer<Entry> onSelect,
         Runnable onReset,
         int index,
         int x,
@@ -63,6 +65,8 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
       super(index, x, y, width, HEIGHT);
       this.textRenderer = textRenderer;
       this.keyBinding = keyBinding;
+
+      this.boundString = this.calculateBoundString();
 
       LinearLayoutWidget layout = LinearLayoutWidget.horizontal()
           .spacing(GuiUtil.PADDING)
@@ -83,7 +87,7 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
 
       this.editButton = layout.add(
           ButtonWidget.builder(keyBinding.getBoundText(), (button) -> {
-            onSelect.run();
+            onSelect.accept(this);
           })
               .width(EDIT_BUTTON_WIDTH)
               .build());
@@ -133,20 +137,23 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
       return this.keyBinding;
     }
 
-    public void reset() {
-      this.keyBinding.reset();
+    public String getBoundString() {
+      return this.boundString;
     }
 
     public void setSelected(boolean selected) {
       this.selected = selected;
     }
 
-    public void setKey(InputUtil.Key key) {
-      this.keyBinding.setKey(key);
+    public void reset() {
+      this.keyBinding.reset();
+      this.boundString = this.calculateBoundString();
     }
 
-    public void setModifiers(Collection<Modifier> modifiers) {
+    public void set(InputUtil.Key key, Collection<Modifier> modifiers) {
+      this.keyBinding.setKey(key);
       this.keyBinding.setModifiers(modifiers);
+      this.boundString = this.calculateBoundString();
     }
 
     public void setConflicts(Collection<DebugKeyBinding> conflicts) {
@@ -217,10 +224,22 @@ public class BindingListWidget extends ParentElementEntryListWidget<BindingListW
           Formatting.ITALIC);
     }
 
+    private String calculateBoundString() {
+      if (this.keyBinding.isUnbound()) {
+        return "";
+      }
+
+      StringBuilder builder = new StringBuilder(String.valueOf(this.keyBinding.getBoundKey().getCode()));
+      for (Modifier modifier : this.keyBinding.getBoundModifiers()) {
+        builder.append(" ").append(modifier.name());
+      }
+      return builder.toString();
+    }
+
     public static FlowListWidget.EntryFactory<Entry> factory(
         TextRenderer textRenderer,
         DebugKeyBinding keyBinding,
-        Runnable onSelect,
+        Consumer<Entry> onSelect,
         Runnable onReset) {
       return (index, x, y, width) -> new Entry(
           textRenderer,

@@ -1,10 +1,12 @@
 package me.roundaround.f3api.client;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Set;
 
-import me.roundaround.f3api.api.DebugKeyBinding;
 import me.roundaround.f3api.api.BindingRegistry;
+import me.roundaround.f3api.api.DebugKeyBinding;
 import me.roundaround.f3api.api.Modifier;
 import me.roundaround.f3api.roundalib.client.gui.layout.screen.ThreeSectionLayoutWidget;
 import me.roundaround.f3api.roundalib.client.gui.screen.BaseScreen;
@@ -21,7 +23,7 @@ public class DebugKeyBindingsScreen extends BaseScreen {
 
   private BindingListWidget list;
   private ButtonWidget resetAllButton;
-  private DebugKeyBinding selectedKeyBinding;
+  private BindingListWidget.Entry selectedEntry;
 
   public DebugKeyBindingsScreen(Screen parent) {
     super(
@@ -39,10 +41,10 @@ public class DebugKeyBindingsScreen extends BaseScreen {
       this.list.addEntry(BindingListWidget.Entry.factory(
           this.textRenderer,
           keyBinding,
-          () -> {
-            this.selectedKeyBinding = keyBinding;
+          (selectedEntry) -> {
+            this.selectedEntry = selectedEntry;
             this.list.forEachEntry((entry) -> {
-              entry.setSelected(entry.getKeyBinding().equals(this.selectedKeyBinding));
+              entry.setSelected(entry.equals(selectedEntry));
             });
             this.update();
           },
@@ -75,21 +77,19 @@ public class DebugKeyBindingsScreen extends BaseScreen {
 
   @Override
   public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-    if (this.selectedKeyBinding != null) {
+    if (this.selectedEntry != null) {
       if (DebugKeyBinding.RESERVED_KEYS.contains(keyCode)) {
         return false;
       }
 
       if (keyCode == InputUtil.GLFW_KEY_ESCAPE) {
-        this.selectedKeyBinding.setKey(InputUtil.UNKNOWN_KEY);
-        this.selectedKeyBinding.setModifiers(Set.of());
+        this.selectedEntry.set(InputUtil.UNKNOWN_KEY, Set.of());
       } else {
-        this.selectedKeyBinding.setKey(InputUtil.fromKeyCode(keyCode, scanCode));
-        this.selectedKeyBinding.setModifiers(Arrays.stream(Modifier.values())
+        this.selectedEntry.set(InputUtil.fromKeyCode(keyCode, scanCode), Arrays.stream(Modifier.values())
             .filter(Modifier::isActive)
             .toList());
       }
-      this.selectedKeyBinding = null;
+      this.selectedEntry = null;
 
       this.list.forEachEntry((entry) -> {
         entry.setSelected(false);
@@ -110,13 +110,18 @@ public class DebugKeyBindingsScreen extends BaseScreen {
   }
 
   private void update() {
-    // TODO: Conflict detection
+    HashMap<String, ArrayList<DebugKeyBinding>> buckets = new HashMap<>();
+    this.list.forEachEntry((entry) -> {
+      buckets.computeIfAbsent(entry.getBoundString(), (key) -> new ArrayList<>()).add(entry.getKeyBinding());
+    });
 
     var isDirty = new Object() {
       boolean value = false;
     };
 
     this.list.forEachEntry((entry) -> {
+      entry.setConflicts(buckets.computeIfAbsent(entry.getBoundString(), (key) -> new ArrayList<>()));
+
       entry.update();
       if (!entry.isDefault()) {
         isDirty.value = true;
