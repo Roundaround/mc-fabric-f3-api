@@ -1,4 +1,4 @@
-![F3 API](https://github.com/Roundaround/mc-fabric-f3-api/blob/main/assets/title-round.png)
+![F3 API](https://github.com/Roundaround/mc-fabric-f3-api/raw/main/assets/title-round.png)
 
 ![](https://img.shields.io/badge/Loader-Fabric-313e51?style=for-the-badge)
 ![](https://img.shields.io/badge/MC-1.21.6-313e51?style=for-the-badge)
@@ -16,7 +16,7 @@ API & UI enabling easy compatibility among vanilla and mods with F3 key binds.
 
 For end users, the mod provides a familiar key binds screen specifically for all the F3 + ? debug key binds in the vanilla game. For a few select mods out there (see below), it also automatically registers the appropritate key binds to ensure compatibility.
 
-![Edit key binds screen](https://github.com/Roundaround/mc-fabric-f3-api/blob/main/assets/1.21.6-edit.png)
+![Edit key binds screen](https://github.com/Roundaround/mc-fabric-f3-api/raw/main/assets/1.21.6-edit.png)
 
 For mod developers, it exposes an "api" package that you can build your mod on top of to easily
 register your debug key binds without having to write all the custom mixins yourself! See the API
