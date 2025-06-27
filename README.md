@@ -1,4 +1,4 @@
-![F3 API](https://github.com/Roundaround/mc-fabric-f3-api/blob/main/assets/title.png)
+![F3 API](https://github.com/Roundaround/mc-fabric-f3-api/blob/main/assets/title-round.png)
 
 ![](https://img.shields.io/badge/Loader-Fabric-313e51?style=for-the-badge)
 ![](https://img.shields.io/badge/MC-1.21.6-313e51?style=for-the-badge)
